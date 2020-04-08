@@ -14,9 +14,14 @@ Prerequisites:
 """
 
 import pandas as pd
+import os
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+
+
+os.chdir("OneDrive\Documents\Github\leetcode-problems-categorized")
 
 
 # Initiate a webdriver and get the desired url
@@ -40,6 +45,48 @@ for i in list_problems:
     list_href.append(href)
 
 df = pd.DataFrame(data={"href": list_href})
-df.to_csv("LC_problems.csv")
+
+
+df['title'] = ''
+df['difficulty'] = ''
+df['content'] = ''
+df['complete'] = ''
+
+
+# for each problem, load the url and extraxt the following info:
+for i in range(df.size):
+    href = df["href"][i]
+    browserLC.get(href)
+    browserLC.implicitly_wait(5) 
+    title = browserLC.find_element(By.XPATH, 
+                                   "//div[@data-cy='question-title']").text
+    diff = browserLC.find_element(By.XPATH, 
+                                  "//div[@diff='easy']|//div[@diff='medium']|//div[@diff='hard']").text
+    content = browserLC.find_elements(By.XPATH, 
+                                  "//div[contains(@class, 'question-content')]/div/p|//div[contains(@class, 'question-content')]/div/pre|//div[contains(@class, 'question-content')]/div/ul")
+    contents = ""
+    if len(content)>1:
+        for j in content:
+            contents += j.text + "\n"
+    
+    df['title'][i] = title
+    df['difficulty'][i] = diff
+    df['content'][i] = contents
+    df['complete'][i] = 'y'
+    
+    
+df.to_csv("LC_problems.csv")    
+    
+    
+
+
+
+
+
+
+
+
+
+
 
 
